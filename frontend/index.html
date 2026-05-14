@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bookify - Mini Library System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --soil:    #4a382d;
+    --soil-lt: #7a6558;
+    --soil-dk: #2e201a;
+    --blue:    #d7deeb;
+    --blue-lt: #eaf0f7;
+    --blue-md: #b2bdd4;
+    --cloud:   #d1cdc6;
+    --cloud-lt:#eceae6;
+    --cloud-dk:#a39f99;
+    --cream:   #f5f2ee;
+    --white:   #fdfcfb;
+    --text:    #2e201a;
+    --text-2:  #7a6558;
+    --text-3:  #a39f99;
+    --border:  #d1cdc6;
+    --radius:  2px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--cream);
+    color: var(--text);
+    font-family: 'Times New Roman', 'IM Fell English', serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── LAYOUT ─── */
+  .shell { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--soil);
+    color: var(--blue-lt);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  .sidebar-brand {
+    padding: 2rem 1.75rem 1.5rem;
+    border-bottom: 1px solid rgba(215,222,235,0.15);
+  }
+
+  .sidebar-brand h1 {
+    font-size: 1.75rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    color: var(--blue-lt);
+    font-style: italic;
+    line-height: 1.1;
+  }
+
+  .sidebar-brand p {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--blue-md);
+    margin-top: 4px;
+  }
+
+  .sidebar-nav {
+    padding: 1.5rem 0;
+    flex: 1;
+  }
+
+  .nav-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--blue-md);
+    padding: 0 1.75rem;
+    margin-bottom: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .nav-label:first-child { margin-top: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.75rem;
+    font-size: 0.95rem;
+    color: rgba(215,222,235,0.7);
+    cursor: pointer;
+    transition: all 0.18s ease;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-item:hover {
+    color: var(--blue-lt);
+    background: rgba(215,222,235,0.07);
+    border-left-color: rgba(215,222,235,0.3);
+  }
+
+  .nav-item.active {
+    color: var(--blue-lt);
+    background: rgba(215,222,235,0.12);
+    border-left-color: var(--blue);
+    font-style: italic;
+  }
+
+  .nav-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.75;
+    flex-shrink: 0;
+  }
+
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 1.25rem 1.75rem;
+    border-top: 1px solid rgba(215,222,235,0.12);
+    font-size: 0.75rem;
+    color: rgba(215,222,235,0.35);
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── MAIN CONTENT ─── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+  }
+
+  .topbar {
+    padding: 1.25rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  .topbar-title {
+    font-size: 1rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    font-style: normal;
+    font-weight: normal;
+  }
+
+  .topbar-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #7aad8a;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .page-content {
+    padding: 2.5rem;
+    flex: 1;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── PAGE HEADER ─── */
+  .page-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .page-header h2 {
+    font-size: 2.2rem;
+    font-weight: normal;
+    font-style: italic;
+    letter-spacing: -0.01em;
+    color: var(--soil-dk);
+    line-height: 1.1;
+  }
+
+  .page-header p {
+    font-size: 0.85rem;
+    color: var(--text-3);
+    margin-top: 0.35rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── STAT CARDS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+    cursor: default;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--cloud-dk);
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 2.4rem;
+    color: var(--soil-dk);
+    font-weight: normal;
+    line-height: 1;
+    font-style: italic;
+  }
+
+  .stat-sub {
+    font-size: 0.78rem;
+    color: var(--text-3);
+    margin-top: 0.4rem;
+  }
+
+  /* ─── TABLE ─── */
+  .table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .table-head {
+    padding: 1.25rem 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .table-head-title {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-2);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  thead th {
+    padding: 0.75rem 1.5rem;
+    text-align: left;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: normal;
+    border-bottom: 1px solid var(--border);
+    background: var(--cream);
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(209,205,198,0.5);
+    transition: background 0.14s ease;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:hover { background: var(--blue-lt); }
+
+  tbody td {
+    padding: 1rem 1.5rem;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .td-muted { color: var(--text-3); font-style: italic; font-size: 0.85rem; }
+
+  /* ─── BADGE ─── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid;
+    font-style: normal;
+  }
+
+  .badge-borrowed {
+    background: rgba(215,222,235,0.4);
+    border-color: var(--blue-md);
+    color: #3a4f72;
+  }
+
+  .badge-returned {
+    background: rgba(122,173,138,0.15);
+    border-color: #7aad8a;
+    color: #3a6e4a;
+  }
+
+  .badge-low {
+    background: rgba(209,205,198,0.4);
+    border-color: var(--cloud-dk);
+    color: var(--soil);
+  }
+
+  /* ─── BUTTON ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
+    font-family: 'Times New Roman', serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all 0.18s ease;
+    text-decoration: none;
+    background: transparent;
+  }
+
+  .btn-primary {
+    background: var(--soil);
+    border-color: var(--soil);
+    color: var(--blue-lt);
+  }
+
+  .btn-primary:hover {
+    background: var(--soil-dk);
+    border-color: var(--soil-dk);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text-2);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--soil-lt);
+    color: var(--soil);
+  }
+
+  .btn-danger {
+    background: transparent;
+    border-color: #c9847a;
+    color: #9e4438;
+  }
+
+  .btn-danger:hover {
+    background: #9e4438;
+    color: var(--white);
+  }
+
+  .btn-sm {
+    padding: 0.3rem 0.85rem;
+    font-size: 0.72rem;
+  }
+
+  /* ─── FORM / MODAL ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(46,32,26,0.45);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--border);
+    padding: 2rem 2.25rem 2.25rem;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.22s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-title {
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--soil-dk);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-3);
+    font-family: serif;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s;
+  }
+
+  .modal-close:hover { color: var(--soil); }
+
+  .form-group { margin-bottom: 1.25rem; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: 0.4rem;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    font-family: 'Times New Roman', serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    transition: border-color 0.18s;
+    outline: none;
+    appearance: none;
+  }
+
+  .form-input:focus { border-color: var(--soil-lt); background: var(--white); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .form-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ─── ALERT ─── */
+  .alert {
+    padding: 0.85rem 1.25rem;
+    border-left: 3px solid;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    display: none;
+  }
+
+  .alert.show { display: block; animation: fadeIn 0.2s ease; }
+
+  .alert-success {
+    background: rgba(122,173,138,0.12);
+    border-color: #7aad8a;
+    color: #3a6e4a;
+  }
+
+  .alert-error {
+    background: rgba(180,70,60,0.08);
+    border-color: #c9847a;
+    color: #9e4438;
+  }
+
+  /* ─── LOADING / EMPTY ─── */
+  .loading-row td {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-3);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  .empty-row td {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-3);
+    font-style: italic;
+  }
+
+  /* ─── DASHBOARD SECTION ─── */
+  .section-title {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 1rem;
+    margin-top: 2rem;
+  }
+
+  .activity-list {
+    background: var(--white);
+    border: 1px solid var(--border);
+  }
+
+  .activity-item {
+    padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(209,205,198,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.88rem;
+    transition: background 0.14s;
+  }
+
+  .activity-item:last-child { border-bottom: none; }
+  .activity-item:hover { background: var(--blue-lt); }
+
+  .activity-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── SEARCH ─── */
+  .search-wrap {
+    position: relative;
+    max-width: 260px;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 0.45rem 0.85rem 0.45rem 2rem;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    font-family: 'Times New Roman', serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.18s;
+  }
+
+  .search-wrap input:focus { border-color: var(--soil-lt); }
+
+  .search-icon {
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 13px;
+    height: 13px;
+    color: var(--text-3);
+    pointer-events: none;
+  }
+
+  /* ─── PAGE VISIBILITY ─── */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeUp 0.28s ease both; }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* ─── ORNAMENT ─── */
+  .ornament {
+    color: var(--cloud-dk);
+    letter-spacing: 0.3em;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--cream); }
+  ::-webkit-scrollbar-thumb { background: var(--cloud); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cloud-dk); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ─── SIDEBAR ─── -->
+  <nav class="sidebar" role="navigation" aria-label="Main navigation">
+    <div class="sidebar-brand">
+      <h1>Bookify</h1>
+      <p>Mini Library System</p>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">Overview</div>
+      <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard', this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </a>
+
+      <div class="nav-label" style="margin-top:1.25rem">Services</div>
+      <a class="nav-item" data-page="users" onclick="navigate('users', this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Users
+      </a>
+      <a class="nav-item" data-page="books" onclick="navigate('books', this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Books
+      </a>
+      <a class="nav-item" data-page="loans" onclick="navigate('loans', this)">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 12h6m-3-3v6"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4"/></svg>
+        Loans
+      </a>
+    </div>
+    <div class="sidebar-footer">
+      © 2026 Developed for Technology Integration Systems Assignment by Group 9, FILKOM UB.
+    </div>
+  </nav>
+
+  <!-- ─── MAIN ─── -->
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-status">
+        <span class="status-dot"></span>
+        <span id="api-status">Connecting...</span>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ─── DASHBOARD ─── -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <span class="ornament">&#8213; &#8213; &#8213;</span>
+            <h2>Good day,<br>welcome back.</h2>
+            <p>System overview &mdash; <span id="today-date"></span></p>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="dash-stats">
+          <div class="stat-card">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="dash-total-users">-</div>
+            <div class="stat-sub">Registered members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Books</div>
+            <div class="stat-value" id="dash-total-books">-</div>
+            <div class="stat-sub">In catalogue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Loans</div>
+            <div class="stat-value" id="dash-active-loans">-</div>
+            <div class="stat-sub">Currently borrowed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Returned</div>
+            <div class="stat-value" id="dash-returned">-</div>
+            <div class="stat-sub">Completed loans</div>
+          </div>
+        </div>
+
+        <div class="section-title">Recent Loan Activity</div>
+        <div class="activity-list" id="dash-activity">
+          <div class="activity-item">
+            <span style="color:var(--text-3);font-style:italic">Loading activity...</span>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+      </section>
+
+      <!-- ─── USERS ─── -->
+      <section class="page" id="page-users">
+        <div class="page-header">
+          <div>
+            <span class="ornament">&#8213; &#8213; &#8213;</span>
+            <h2>Users</h2>
+            <p>Manage registered library members</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-user')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add User
+          </button>
+        </div>
+
+        <div id="alert-user" class="alert"></div>
+
+        <div class="table-wrap">
+          <div class="table-head">
+            <span class="table-head-title">All Members</span>
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Search users..." oninput="filterTable('tbl-users', this.value)" aria-label="Search users" />
+            </div>
+          </div>
+          <table id="tbl-users" aria-label="Users list">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Registered</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-users">
+              <tr class="loading-row"><td colspan="5">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── BOOKS ─── -->
+      <section class="page" id="page-books">
+        <div class="page-header">
+          <div>
+            <span class="ornament">&#8213; &#8213; &#8213;</span>
+            <h2>Books</h2>
+            <p>Catalogue &mdash; titles, stock &amp; details</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-book')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Book
+          </button>
+        </div>
+
+        <div id="alert-book" class="alert"></div>
+
+        <div class="table-wrap">
+          <div class="table-head">
+            <span class="table-head-title">Catalogue</span>
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Search books..." oninput="filterTable('tbl-books', this.value)" aria-label="Search books" />
+            </div>
+          </div>
+          <table id="tbl-books" aria-label="Books list">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Publisher</th>
+                <th>Year</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-books">
+              <tr class="loading-row"><td colspan="7">Loading books...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ─── LOANS ─── -->
+      <section class="page" id="page-loans">
+        <div class="page-header">
+          <div>
+            <span class="ornament">&#8213; &#8213; &#8213;</span>
+            <h2>Loans</h2>
+            <p>Borrowing history &amp; return management</p>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-loan')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Borrow Book
+          </button>
+        </div>
+
+        <div id="alert-loan" class="alert"></div>
+
+        <div class="table-wrap">
+          <div class="table-head">
+            <span class="table-head-title">Loan History</span>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <div class="search-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Search loans..." oninput="filterTable('tbl-loans', this.value)" aria-label="Search loans" />
+              </div>
+            </div>
+          </div>
+          <table id="tbl-loans" aria-label="Loans list">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Book</th>
+                <th>Borrowed</th>
+                <th>Due</th>
+                <th>Returned</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-loans">
+              <tr class="loading-row"><td colspan="8">Loading loans...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+
+<!-- ─── MODALS ─── -->
+
+<!-- Add User -->
+<div class="modal-overlay" id="modal-add-user" role="dialog" aria-modal="true" aria-labelledby="modal-user-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-user')" aria-label="Close">&#215;</button>
+    <div class="modal-title" id="modal-user-title">Register New Member</div>
+    <div id="alert-user-modal" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label" for="user-name">Full Name</label>
+      <input class="form-input" id="user-name" type="text" placeholder="e.g. Adelia Swa" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="user-email">Email Address</label>
+      <input class="form-input" id="user-email" type="email" placeholder="adelia@gmail.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="user-phone">Phone Number</label>
+      <input class="form-input" id="user-phone" type="text" placeholder="08xxx" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitUser()">Register Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Book -->
+<div class="modal-overlay" id="modal-add-book" role="dialog" aria-modal="true" aria-labelledby="modal-book-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-book')" aria-label="Close">&#215;</button>
+    <div class="modal-title" id="modal-book-title">Add New Book</div>
+    <div id="alert-book-modal" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label" for="book-title">Title</label>
+      <input class="form-input" id="book-title" type="text" placeholder="e.g. Laravel Dasar" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="book-author">Author</label>
+        <input class="form-input" id="book-author" type="text" placeholder="Author name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="book-publisher">Publisher</label>
+        <input class="form-input" id="book-publisher" type="text" placeholder="Publisher" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="book-year">Year</label>
+        <input class="form-input" id="book-year" type="number" placeholder="2025" min="1900" max="2100" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="book-stock">Stock</label>
+        <input class="form-input" id="book-stock" type="number" placeholder="10" min="0" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitBook()">Add to Catalogue</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Book -->
+<div class="modal-overlay" id="modal-edit-book" role="dialog" aria-modal="true" aria-labelledby="modal-edit-book-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-edit-book')" aria-label="Close">&#215;</button>
+    <div class="modal-title" id="modal-edit-book-title">Update Book</div>
+    <input type="hidden" id="edit-book-id" />
+    <div id="alert-edit-book-modal" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label" for="edit-book-title">Title</label>
+      <input class="form-input" id="edit-book-title" type="text" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="edit-book-author">Author</label>
+        <input class="form-input" id="edit-book-author" type="text" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-book-publisher">Publisher</label>
+        <input class="form-input" id="edit-book-publisher" type="text" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="edit-book-year">Year</label>
+        <input class="form-input" id="edit-book-year" type="number" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="edit-book-stock">Stock</label>
+        <input class="form-input" id="edit-book-stock" type="number" min="0" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-book')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitEditBook()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Loan -->
+<div class="modal-overlay" id="modal-add-loan" role="dialog" aria-modal="true" aria-labelledby="modal-loan-title">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-add-loan')" aria-label="Close">&#215;</button>
+    <div class="modal-title" id="modal-loan-title">Borrow a Book</div>
+    <div id="alert-loan-modal" class="alert"></div>
+    <div class="form-group">
+      <label class="form-label" for="loan-user-id">User ID</label>
+      <input class="form-input" id="loan-user-id" type="number" placeholder="e.g. 1" min="1" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="loan-book-id">Book ID</label>
+      <input class="form-input" id="loan-book-id" type="number" placeholder="e.g. 1" min="1" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="loan-due-date">Due Date</label>
+      <input class="form-input" id="loan-due-date" type="date" />
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-loan')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitLoan()">Confirm Loan</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const API = {
+  users:  'http://localhost:8001/api',
+  books:  'http://localhost:8002/api',
+  loans:  'http://localhost:8003/api',
+};
+
+// ── Navigation ──
+function navigate(page, el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('page-' + page).classList.add('active');
+  const titles = { dashboard: 'Dashboard', users: 'Users', books: 'Books', loans: 'Loans' };
+  document.getElementById('topbar-title').textContent = titles[page] || page;
+  if (page === 'users')  loadUsers();
+  if (page === 'books')  loadBooks();
+  if (page === 'loans')  loadLoans();
+  if (page === 'dashboard') loadDashboard();
+}
+
+// ── Modal helpers ──
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) closeModal(ov.id); });
+});
+
+// ── Alert helper ──
+function showAlert(id, msg, type = 'success') {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'alert ' + (type === 'success' ? 'alert-success' : 'alert-error') + ' show';
+  el.textContent = msg;
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// ── Filter table ──
+function filterTable(tableId, query) {
+  const q = query.toLowerCase();
+  const rows = document.querySelectorAll('#' + tableId + ' tbody tr');
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ── Fetch helper ──
+async function apiFetch(url, opts = {}) {
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    ...opts
+  });
+  const data = await res.json();
+  if (!res.ok) throw data;
+  return data;
+}
+
+// ── Format date ──
+function fmtDate(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+// ════════════════════════════════
+// USERS
+// ════════════════════════════════
+async function loadUsers() {
+  const tbody = document.getElementById('tbody-users');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Loading...</td></tr>';
+  try {
+    const data = await apiFetch(API.users + '/users');
+    const users = data.data || [];
+    if (!users.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No members found. Add one to get started.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td class="td-muted">${u.id}</td>
+        <td><strong style="font-weight:500">${esc(u.name)}</strong></td>
+        <td class="td-muted">${esc(u.email)}</td>
+        <td class="td-muted">${esc(u.phone || '-')}</td>
+        <td class="td-muted">${fmtDate(u.created_at)}</td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="5">Could not reach User Service (port 8001). Make sure it is running.</td></tr>`;
+  }
+}
+
+async function submitUser() {
+  const name  = document.getElementById('user-name').value.trim();
+  const email = document.getElementById('user-email').value.trim();
+  const phone = document.getElementById('user-phone').value.trim();
+  if (!name || !email) { showAlert('alert-user-modal', 'Name and email are required.', 'error'); return; }
+  try {
+    await apiFetch(API.users + '/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, phone })
+    });
+    closeModal('modal-add-user');
+    document.getElementById('user-name').value = '';
+    document.getElementById('user-email').value = '';
+    document.getElementById('user-phone').value = '';
+    showAlert('alert-user', 'Member registered successfully.', 'success');
+    loadUsers();
+  } catch(e) {
+    const msg = e?.errors?.email?.[0] || e?.message || 'Failed to register.';
+    showAlert('alert-user-modal', msg, 'error');
+  }
+}
+
+// ════════════════════════════════
+// BOOKS
+// ════════════════════════════════
+async function loadBooks() {
+  const tbody = document.getElementById('tbody-books');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Loading...</td></tr>';
+  try {
+    const data = await apiFetch(API.books + '/products');
+    const books = data.data || [];
+    if (!books.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No books in catalogue yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = books.map(b => `
+      <tr>
+        <td class="td-muted">${b.id}</td>
+        <td><span style="font-weight:500">${esc(b.title)}</span></td>
+        <td class="td-muted">${esc(b.author)}</td>
+        <td class="td-muted">${esc(b.publisher || '-')}</td>
+        <td class="td-muted">${b.year || '-'}</td>
+        <td>${b.stock <= 0
+          ? `<span class="badge badge-low">Out</span>`
+          : `<span style="font-style:italic;color:var(--text-2)">${b.stock}</span>`}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm" onclick="openEditBook(${b.id},'${esc(b.title)}','${esc(b.author)}','${esc(b.publisher||'')}',${b.year||''},${b.stock})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteBook(${b.id})">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Could not reach Book Service (port 8002).</td></tr>`;
+  }
+}
+
+function openEditBook(id, title, author, publisher, year, stock) {
+  document.getElementById('edit-book-id').value = id;
+  document.getElementById('edit-book-title').value = title;
+  document.getElementById('edit-book-author').value = author;
+  document.getElementById('edit-book-publisher').value = publisher;
+  document.getElementById('edit-book-year').value = year;
+  document.getElementById('edit-book-stock').value = stock;
+  openModal('modal-edit-book');
+}
+
+async function submitBook() {
+  const title     = document.getElementById('book-title').value.trim();
+  const author    = document.getElementById('book-author').value.trim();
+  const publisher = document.getElementById('book-publisher').value.trim();
+  const year      = parseInt(document.getElementById('book-year').value);
+  const stock     = parseInt(document.getElementById('book-stock').value);
+  if (!title || !author) { showAlert('alert-book-modal', 'Title and author are required.', 'error'); return; }
+  if (stock < 0) { showAlert('alert-book-modal', 'Stock cannot be negative.', 'error'); return; }
+  try {
+    await apiFetch(API.books + '/products', {
+      method: 'POST',
+      body: JSON.stringify({ title, author, publisher, year, stock })
+    });
+    closeModal('modal-add-book');
+    ['book-title','book-author','book-publisher','book-year','book-stock'].forEach(id => document.getElementById(id).value = '');
+    showAlert('alert-book', 'Book added to catalogue.', 'success');
+    loadBooks();
+  } catch(e) {
+    const msg = e?.message || 'Failed to add book.';
+    showAlert('alert-book-modal', msg, 'error');
+  }
+}
+
+async function submitEditBook() {
+  const id        = document.getElementById('edit-book-id').value;
+  const title     = document.getElementById('edit-book-title').value.trim();
+  const author    = document.getElementById('edit-book-author').value.trim();
+  const publisher = document.getElementById('edit-book-publisher').value.trim();
+  const year      = parseInt(document.getElementById('edit-book-year').value);
+  const stock     = parseInt(document.getElementById('edit-book-stock').value);
+  if (stock < 0) { showAlert('alert-edit-book-modal', 'Stock cannot be negative.', 'error'); return; }
+  try {
+    await apiFetch(API.books + '/products/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({ title, author, publisher, year, stock })
+    });
+    closeModal('modal-edit-book');
+    showAlert('alert-book', 'Book updated.', 'success');
+    loadBooks();
+  } catch(e) {
+    const msg = e?.message || 'Failed to update.';
+    showAlert('alert-edit-book-modal', msg, 'error');
+  }
+}
+
+async function deleteBook(id) {
+  if (!confirm('Delete this book from the catalogue?')) return;
+  try {
+    await apiFetch(API.books + '/products/' + id, { method: 'DELETE' });
+    showAlert('alert-book', 'Book removed from catalogue.', 'success');
+    loadBooks();
+  } catch(e) {
+    showAlert('alert-book', 'Failed to delete book.', 'error');
+  }
+}
+
+// ════════════════════════════════
+// LOANS
+// ════════════════════════════════
+async function loadLoans() {
+  const tbody = document.getElementById('tbody-loans');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading...</td></tr>';
+  try {
+    const data = await apiFetch(API.loans + '/loans');
+    const loans = data.data || [];
+    if (!loans.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No loan records found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = loans.map(l => `
+      <tr>
+        <td class="td-muted">${l.id}</td>
+        <td class="td-muted">${l.user_id}</td>
+        <td class="td-muted">${l.book_id}</td>
+        <td class="td-muted">${fmtDate(l.borrowed_at)}</td>
+        <td class="td-muted">${fmtDate(l.due_date)}</td>
+        <td class="td-muted">${fmtDate(l.returned_at)}</td>
+        <td><span class="badge ${l.status === 'returned' ? 'badge-returned' : 'badge-borrowed'}">${l.status}</span></td>
+        <td>${l.status === 'borrowed'
+          ? `<button class="btn btn-outline btn-sm" onclick="returnBook(${l.id})">Return</button>`
+          : '<span class="td-muted">-</span>'}</td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Could not reach Loan Service (port 8003).</td></tr>`;
+  }
+}
+
+async function submitLoan() {
+  const user_id  = parseInt(document.getElementById('loan-user-id').value);
+  const book_id  = parseInt(document.getElementById('loan-book-id').value);
+  const due_date = document.getElementById('loan-due-date').value;
+  if (!user_id || !book_id) { showAlert('alert-loan-modal', 'User ID and Book ID are required.', 'error'); return; }
+  try {
+    await apiFetch(API.loans + '/loans', {
+      method: 'POST',
+      body: JSON.stringify({ user_id, book_id, due_date })
+    });
+    closeModal('modal-add-loan');
+    ['loan-user-id','loan-book-id','loan-due-date'].forEach(id => document.getElementById(id).value = '');
+    showAlert('alert-loan', 'Book borrowed successfully.', 'success');
+    loadLoans();
+  } catch(e) {
+    const msg = e?.message || 'Failed to create loan.';
+    showAlert('alert-loan-modal', msg, 'error');
+  }
+}
+
+async function returnBook(id) {
+  if (!confirm('Mark this loan as returned?')) return;
+  try {
+    await apiFetch(API.loans + '/loans/' + id + '/return', { method: 'PUT' });
+    showAlert('alert-loan', 'Book returned. Stock updated.', 'success');
+    loadLoans();
+  } catch(e) {
+    const msg = e?.message || 'Return failed.';
+    showAlert('alert-loan', msg, 'error');
+  }
+}
+
+// ════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════
+async function loadDashboard() {
+  // Today's date
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  try {
+    const [uRes, bRes, lRes] = await Promise.allSettled([
+      apiFetch(API.users + '/users'),
+      apiFetch(API.books + '/products'),
+      apiFetch(API.loans + '/loans'),
+    ]);
+
+    const users  = uRes.status === 'fulfilled' ? (uRes.value.data || []) : [];
+    const books  = bRes.status === 'fulfilled' ? (bRes.value.data || []) : [];
+    const loans  = lRes.status === 'fulfilled' ? (lRes.value.data || []) : [];
+
+    document.getElementById('dash-total-users').textContent  = users.length;
+    document.getElementById('dash-total-books').textContent  = books.length;
+    const active   = loans.filter(l => l.status === 'borrowed').length;
+    const returned = loans.filter(l => l.status === 'returned').length;
+    document.getElementById('dash-active-loans').textContent = active;
+    document.getElementById('dash-returned').textContent     = returned;
+
+    // Activity
+    const activity = document.getElementById('dash-activity');
+    const recent = [...loans].reverse().slice(0, 6);
+    if (!recent.length) {
+      activity.innerHTML = '<div class="activity-item"><span style="color:var(--text-3);font-style:italic">No loan activity yet.</span></div>';
+    } else {
+      activity.innerHTML = recent.map(l => `
+        <div class="activity-item">
+          <div style="display:flex;align-items:center;gap:0.65rem">
+            <span class="activity-dot" style="background:${l.status==='returned'?'#7aad8a':'#b2bdd4'}"></span>
+            <span>Loan #${l.id} &mdash; User ${l.user_id}, Book ${l.book_id}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span class="badge ${l.status === 'returned' ? 'badge-returned' : 'badge-borrowed'}">${l.status}</span>
+            <span class="td-muted" style="font-size:0.8rem">${fmtDate(l.borrowed_at)}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    // API status
+    const all3 = [uRes, bRes, lRes].every(r => r.status === 'fulfilled');
+    document.getElementById('api-status').textContent = all3 ? 'All services online' : 'Some services offline';
+
+  } catch(e) {
+    document.getElementById('api-status').textContent = 'Cannot connect';
+  }
+}
+
+// ── Escape HTML ──
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Default due date ──
+(function setDefaultDue() {
+  const d = new Date();
+  d.setDate(d.getDate() + 14);
+  const iso = d.toISOString().split('T')[0];
+  const field = document.getElementById('loan-due-date');
+  if (field) field.value = iso;
+})();
+
+// ── Init ──
+loadDashboard();
+</script>
+</body>
+</html>
